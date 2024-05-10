@@ -44,10 +44,24 @@ def get_expon_lr_func(
     :return HoF which takes step as input
     """
 
+    """
+    创建一个学习率调度函数，该函数根据训练进度动态调整学习率
+    "Copied from Plenoxels" 3DGS和Plenoels有什么共同点呢?其中重要一条就是这俩方法都没有用到神经网络
+
+    :param lr_init: 初始学习率。
+    :param lr_final: 最终学习率。
+    :param lr_delay_steps: 学习率延迟步数，在这些步数内学习率将被降低。
+    :param lr_delay_mult: 学习率延迟乘数，用于计算初始延迟学习率。
+    :param max_steps: 最大步数，用于规范化训练进度。
+    :return: 一个函数，根据当前步数返回调整后的学习率。
+    """
+
     def helper(step):
+        # 如果步数小于0或学习率为0，直接返回0，表示不进行优化
         if step < 0 or (lr_init == 0.0 and lr_final == 0.0):
             # Disable this parameter
             return 0.0
+        # 如果设置了学习率延迟步数，计算延迟调整后的学习率
         if lr_delay_steps > 0:
             # A kind of reverse cosine decay.
             delay_rate = lr_delay_mult + (1 - lr_delay_mult) * np.sin(
@@ -55,8 +69,10 @@ def get_expon_lr_func(
             )
         else:
             delay_rate = 1.0
+        # 根据步数计算学习率的对数线性插值，实现从初始学习率到最终学习率的平滑过渡
         t = np.clip(step / max_steps, 0, 1)
         log_lerp = np.exp(np.log(lr_init) * (1 - t) + np.log(lr_final) * t)
+        # 返回调整后的学习率
         return delay_rate * log_lerp
 
     return helper
@@ -76,6 +92,9 @@ def strip_symmetric(sym):
     return strip_lowerdiag(sym)
 
 def build_rotation(r):
+    """
+    根据四元数构建旋转矩阵
+    """
     norm = torch.sqrt(r[:,0]*r[:,0] + r[:,1]*r[:,1] + r[:,2]*r[:,2] + r[:,3]*r[:,3])
 
     q = r / norm[:, None]
