@@ -34,7 +34,7 @@ class GaussianModel:
             symm = strip_symmetric(actual_covariance) # 提取对称部分
             return symm
         
-        # 初始化一些激活函数
+        # 初始化一些激活函数，这些激活函数被包装一层get_scaling()、get_rotation()、get_covariance()等，在render渲染的时候被调用
         self.scaling_activation = torch.exp # 用指数函数确保尺度参数非负
         self.scaling_inverse_activation = torch.log # 尺度参数的逆激活函数，对数函数
 

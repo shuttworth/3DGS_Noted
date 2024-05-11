@@ -103,7 +103,7 @@ def training(dataset, opt, pipe, testing_iterations, saving_iterations, checkpoi
         # 计算渲染图像与真实图像之间的损失
         gt_image = viewpoint_cam.original_image.cuda()
         Ll1 = l1_loss(image, gt_image)
-        # 这正是参数优化的损失函数（L1 与 D-SSIM 项的组合）
+        # 这正是参数优化的损失函数（L1 与 D-SSIM 项的组合），对应论文的公式(7)
         loss = (1.0 - opt.lambda_dssim) * Ll1 + opt.lambda_dssim * (1.0 - ssim(image, gt_image))
         loss.backward()
 
